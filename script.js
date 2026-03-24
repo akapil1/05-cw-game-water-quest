@@ -1,54 +1,155 @@
-// Game configuration and state variables
-const GOAL_CANS = 25;        // Total items needed to collect
-let currentCans = 0;         // Current number of items collected
-let gameActive = false;      // Tracks if game is currently running
-let spawnInterval;          // Holds the interval for spawning items
+// Game configuration
+const GOAL_CANS = 20;
+let currentCans = 0;
+let gameActive = false;
+let spawnInterval;
+let timerInterval;
+let timeLeft = 30;
 
-// Creates the 3x3 game grid where items will appear
+// Messages
+const winMessages = [
+  "Amazing! You helped provide clean water 💧",
+  "You're making a real impact!",
+  "Incredible work, water hero!"
+];
+
+const loseMessages = [
+  "So close! Try again!",
+  "Keep going, every drop counts!",
+  "You can do it!"
+];
+
+// Create grid
 function createGrid() {
   const grid = document.querySelector('.game-grid');
-  grid.innerHTML = ''; // Clear any existing grid cells
+  grid.innerHTML = '';
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement('div');
-    cell.className = 'grid-cell'; // Each cell represents a grid square
+    cell.className = 'grid-cell';
     grid.appendChild(cell);
   }
 }
 
-// Ensure the grid is created when the page loads
 createGrid();
 
-// Spawns a new item in a random grid cell
+// Spawn cans
 function spawnWaterCan() {
-  if (!gameActive) return; // Stop if the game is not active
+  if (!gameActive) return;
+
   const cells = document.querySelectorAll('.grid-cell');
-  
-  // Clear all cells before spawning a new water can
   cells.forEach(cell => (cell.innerHTML = ''));
 
-  // Select a random cell from the grid to place the water can
   const randomCell = cells[Math.floor(Math.random() * cells.length)];
 
-  // Use a template literal to create the wrapper and water-can element
-  randomCell.innerHTML = `
-    <div class="water-can-wrapper">
-      <div class="water-can"></div>
-    </div>
-  `;
+  const can = document.createElement('div');
+  can.className = 'water-can';
+
+  // CLICK EVENT (CORE FEATURE)
+  can.addEventListener('click', () => {
+    if (!gameActive) return;
+
+    currentCans++;
+    document.getElementById('current-cans').textContent = currentCans;
+
+    // visual feedback
+    can.style.transform = "scale(1.2)";
+    setTimeout(() => {
+      can.style.transform = "scale(1)";
+    }, 100);
+
+    // remove after click
+    can.remove();
+  });
+
+  randomCell.appendChild(can);
 }
 
-// Initializes and starts a new game
+// TIMER
+function startTimer() {
+  timeLeft = 30;
+  document.getElementById('timer').textContent = timeLeft;
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      endGame();
+    }
+  }, 1000);
+}
+
+// START GAME
 function startGame() {
-  if (gameActive) return; // Prevent starting a new game if one is already active
+  if (gameActive) return;
+
   gameActive = true;
-  createGrid(); // Set up the game grid
-  spawnInterval = setInterval(spawnWaterCan, 1000); // Spawn water cans every second
+  currentCans = 0;
+  document.getElementById('current-cans').textContent = 0;
+  document.getElementById('achievements').textContent = "";
+
+  createGrid();
+  spawnInterval = setInterval(spawnWaterCan, 800);
+  startTimer();
 }
 
+// END GAME
 function endGame() {
-  gameActive = false; // Mark the game as inactive
-  clearInterval(spawnInterval); // Stop spawning water cans
+  gameActive = false;
+  clearInterval(spawnInterval);
+  clearInterval(timerInterval);
+
+  const messageBox = document.getElementById('achievements');
+
+  let message;
+
+  if (currentCans >= GOAL_CANS) {
+    message = winMessages[Math.floor(Math.random() * winMessages.length)];
+    messageBox.style.color = "green";
+
+    // 🎉 celebration
+    setTimeout(() => {
+      alert("You Win! 🎉");
+    }, 200);
+
+  } else {
+    message = loseMessages[Math.floor(Math.random() * loseMessages.length)];
+    messageBox.style.color = "red";
+  }
+
+  messageBox.textContent = message;
 }
 
-// Set up click handler for the start button
+// RESET BUTTON (LEVEL UP)
+function resetGame() {
+  location.reload();
+}
+
+// BUTTON EVENTS
 document.getElementById('start-game').addEventListener('click', startGame);
+
+// Create Reset Button dynamically
+const resetBtn = document.createElement('button');
+resetBtn.textContent = "Reset Game";
+resetBtn.style.backgroundColor = "#FFC907";
+resetBtn.style.color = "#000";
+resetBtn.style.marginTop = "10px";
+
+resetBtn.addEventListener('click', resetGame);
+
+document.querySelector('.container').appendChild(resetBtn);
+
+const overlay = document.getElementById('instruction-overlay');
+const startOverlayBtn = document.getElementById('start-from-overlay');
+
+// Start game from overlay
+startOverlayBtn.addEventListener('click', () => {
+  overlay.style.display = 'none';
+  startGame();
+});
+
+function resetGame() {
+  if (confirm("Restart the game?")) {
+    location.reload();
+  }
+}
