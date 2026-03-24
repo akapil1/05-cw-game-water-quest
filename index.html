@@ -1,23 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Water Quest</title>
   <link href="style.css" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
 </head>
+
 <body>
+
+  <!-- 🌊 Instruction Overlay -->
+  <div id="instruction-overlay" class="overlay">
+    <div class="overlay-card">
+      <h2>💧 Water Quest</h2>
+      
+      <p class="goal">
+        🎯 Goal: Collect at least <strong>20 water cans</strong> in 30 seconds!
+      </p>
+
+      <ul class="instructions-list">
+        <li>Click on the water cans as fast as you can</li>
+        <li>Each can = +1 point</li>
+        <li>You only have 30 seconds</li>
+        <li>Reach 20 to win and help provide clean water 💛</li>
+      </ul>
+
+      <button id="start-from-overlay">Start Game</button>
+    </div>
+  </div>
+
+  <!-- 🌟 Main Game Container -->
   <div class="container">
-    <h1>Water Quest</h1>
-    <p class="game-instructions">Collect 20 items to complete the game!</p>
+    
+    <h1>💧 Water Quest</h1>
+
+    <p class="game-instructions">
+      Help collect clean water for communities in need!
+    </p>
+
+    <!-- 📊 Stats -->
     <div class="stats">
       <p>Cans Collected: <span id="current-cans">0</span></p>
       <p>Time Left: <span id="timer">30</span>s</p>
     </div>
+
+    <!-- 🏆 Result Message -->
     <div id="achievements" class="achievement"></div>
+
+    <!-- 🎮 Game Grid -->
     <div class="game-grid"></div>
+
+    <!-- (Optional) Keep or remove this button -->
+    <!-- You can hide it with CSS if using overlay -->
     <button id="start-game">Start Game</button>
+
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
