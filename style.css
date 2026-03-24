@@ -1,80 +1,73 @@
-/* Charity: water Brand Colors & Fonts
-
-Primary Colors:
-- Yellow:     #FFC907
-- Blue:       #2E9DF7
-
-Secondary Colors:
-- Light Blue: #8BD1CB
-- Green:      #4FCB53
-- Orange:     #FF902A
-- Red:        #F5402C
-- Dark Green: #159A48
-- Pink:       #F16061
-
-Fonts:
-- Proxima Nova
-- Avenir
-
-*/
+/* 🌿 Charity: water Inspired Theme Upgrade */
 
 * {
   box-sizing: border-box;
 }
 
+/* 🌊 Background with image + overlay */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
   margin: 0;
   padding: 30px;
-  background-color: #f0f0f0;
-  color: #333;
+  color: #ffffff;
+
+  background: 
+    linear-gradient(rgba(20, 60, 80, 0.65), rgba(20, 60, 80, 0.65)),
+    url('bg.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
+/* 🌟 Container (glass effect) */
 .container {
-  max-width: 750px;
-  margin: 50px auto;
-  background-color: #fff;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 520px;   /* ⬅️ reduced from 750px */
+  width: 90%;         /* responsive on smaller screens */
+  margin: 40px auto;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  padding: 30px;      /* slightly reduced */
+  border-radius: 16px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
 }
 
+/* 🌊 Title */
 h1 {
   text-align: center;
-  font-size: 30px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #333;
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #E0F7FA;
 }
 
-h1 img {
-  height: 50px;
-  margin-right: 15px;
-  display: block;
-}
-
+/* 🌿 Subtitle */
 .game-instructions {
   font-size: 18px;
-  margin-bottom: 30px;
+  margin-bottom: 18px;
   text-align: center;
+  color: #B2EBF2;
 }
 
+/* 📊 Stats */
 .stats {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 30px;
-  background-color: #f5f5f5;
-  padding: 15px 0;
-  border-radius: 8px;
+  margin-bottom: 25px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 0;
+  border-radius: 10px;
 }
 
 .stats p {
   margin: 0;
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: #E0F7FA;
+  max-width: 360px;   /* ⬅️ smaller grid */
+  gap: 12px;
 }
 
+/* 🎮 Grid */
 .game-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -83,27 +76,32 @@ h1 img {
   max-width: 500px;
 }
 
+/* 🌊 Grid cells */
 .grid-cell {
-  background-color: #e8e8e8;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: 0.3s;
   position: relative;
   overflow: hidden;
 }
 
+.grid-cell:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 💧 Water can */
 .water-can-wrapper {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 70px;
-  height: 70px;
-  /* Ensure the wrapper is properly centered */
+  width: 55px;
+  height: 55px;
 }
 
 .water-can {
@@ -115,29 +113,124 @@ h1 img {
   background-position: center;
   cursor: pointer;
   border-radius: 50%;
-  animation: popUp 0.5s cubic-bezier(0.17, 0.67, 0.34, 2);
-  transform-origin: center; /* Ensure scaling happens from the center */
+  animation: popUp 0.4s ease;
+  transform-origin: center;
+  transition: transform 0.1s ease;
 }
 
+/* ✨ Pop animation */
 @keyframes popUp {
-  0% {
-    transform: scale(0.5); /* Start scaling from the center */
-  }
-  100% {
-    transform: scale(1); /* End scaling at full size */
-  }
+  0% { transform: scale(0.5); }
+  100% { transform: scale(1); }
 }
 
-
+/* 🎯 Buttons */
 button {
-  background-color: #4CAF50;
+  background: linear-gradient(135deg, #2E9DF7, #4FCB53);
   color: white;
   border: none;
   padding: 12px 24px;
   font-size: 16px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   display: block;
-  margin: 30px auto 0;
-  transition: background-color 0.2s;
+  margin: 20px auto 0;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  background: #FFC907;
+  color: black;
+}
+
+/* 🏆 Achievement text */
+.achievement {
+  text-align: center;
+  font-size: 20px;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+/* 🌊 Overlay background */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 20, 40, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 📜 Overlay card */
+.overlay-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  padding: 30px;
+  border-radius: 16px;
+  max-width: 400px;
+  text-align: center;
+  color: white;
+}
+
+.overlay-card h2 {
+  margin-bottom: 15px;
+}
+
+/* 🎯 Goal text */
+.goal {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+/* 📋 Instructions */
+.instructions-list {
+  text-align: left;
+  margin-bottom: 20px;
+  padding-left: 20px;
+}
+
+.instructions-list li {
+  margin-bottom: 8px;
+}
+
+/* 🌟 Start button */
+#start-from-overlay {
+  background-color: #FFC907;
+  color: black;
+  font-weight: bold;
+}
+
+#start-from-overlay:hover {
+  opacity: 0.9;
+}
+
+/* Hide old button */
+#start-game {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .container {
+    max-width: 95%;
+    padding: 20px;
+  }
+
+  .game-grid {
+    max-width: 280px;
+  }
+
+  .water-can-wrapper {
+    width: 45px;
+    height: 45px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
 }
