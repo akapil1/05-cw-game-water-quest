@@ -1,12 +1,44 @@
-// Game configuration
-const GOAL_CANS = 20;
+const difficultySettings = {
+  easy: {
+    label: "Easy",
+    goal: 15,
+    time: 35,
+    spawnRate: 950
+  },
+  normal: {
+    label: "Normal",
+    goal: 20,
+    time: 30,
+    spawnRate: 800
+  },
+  hard: {
+    label: "Hard",
+    goal: 25,
+    time: 25,
+    spawnRate: 650
+  }
+};
+
+let selectedDifficulty = "easy";
 let currentCans = 0;
 let gameActive = false;
-let spawnInterval;
-let timerInterval;
-let timeLeft = 30;
+let spawnInterval = null;
+let timerInterval = null;
+let timeLeft = difficultySettings[selectedDifficulty].time;
+let shownMilestones = [];
 
-// Messages
+// Sound effects
+const clickSound = new Audio("sounds/click.mp3");
+const collectSound = new Audio("sounds/collect.mp3");
+const winSound = new Audio("sounds/win.mp3");
+const loseSound = new Audio("sounds/lose.mp3");
+
+// optional volume control
+clickSound.volume = 0.5;
+collectSound.volume = 0.6;
+winSound.volume = 0.7;
+loseSound.volume = 0.7;
+
 const winMessages = [
   "Amazing! You helped provide clean water 💧",
   "You're making a real impact!",
@@ -19,59 +51,119 @@ const loseMessages = [
   "You can do it!"
 ];
 
-// Create grid
+const milestoneMessages = [
+  { score: 5, text: "Nice start! Every can counts 💙" },
+  { score: 10, text: "Halfway there! Keep going!" },
+  { score: 15, text: "Amazing progress! You're doing great!" },
+  { score: 20, text: "So close to the finish line!" },
+  { score: 25, text: "Water hero status unlocked! 💧🏆" }
+];
+
+const grid = document.querySelector(".game-grid");
+const currentCansEl = document.getElementById("current-cans");
+const timerEl = document.getElementById("timer");
+const goalDisplayEl = document.getElementById("goal-display");
+const achievementsEl = document.getElementById("achievements");
+const milestoneEl = document.getElementById("milestone-message");
+const currentDifficultyEl = document.getElementById("current-difficulty");
+const overlay = document.getElementById("instruction-overlay");
+const startOverlayBtn = document.getElementById("start-from-overlay");
+const startGameBtn = document.getElementById("start-game");
+const resetGameBtn = document.getElementById("reset-game");
+const difficultyDetails = document.getElementById("difficulty-details");
+const difficultyButtons = document.querySelectorAll(".difficulty-btn");
+
+function playSound(sound) {
+  sound.currentTime = 0;
+  sound.play().catch(() => {
+    // avoids errors if browser blocks autoplay
+  });
+}
+
 function createGrid() {
-  const grid = document.querySelector('.game-grid');
-  grid.innerHTML = '';
+  grid.innerHTML = "";
   for (let i = 0; i < 9; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'grid-cell';
+    const cell = document.createElement("div");
+    cell.className = "grid-cell";
     grid.appendChild(cell);
   }
 }
 
-createGrid();
+function updateDifficultyUI() {
+  const settings = difficultySettings[selectedDifficulty];
+  difficultyDetails.textContent = `${settings.label}: Collect ${settings.goal} cans in ${settings.time} seconds`;
+  currentDifficultyEl.textContent = settings.label;
+  goalDisplayEl.textContent = settings.goal;
+  timerEl.textContent = settings.time;
 
-// Spawn cans
+  difficultyButtons.forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.mode === selectedDifficulty);
+  });
+}
+
 function spawnWaterCan() {
   if (!gameActive) return;
 
-  const cells = document.querySelectorAll('.grid-cell');
-  cells.forEach(cell => (cell.innerHTML = ''));
+  const cells = document.querySelectorAll(".grid-cell");
+
+  // clear old cans from DOM
+  cells.forEach(cell => {
+    cell.innerHTML = "";
+  });
 
   const randomCell = cells[Math.floor(Math.random() * cells.length)];
 
-  const can = document.createElement('div');
-  can.className = 'water-can';
+  const wrapper = document.createElement("div");
+  wrapper.className = "water-can-wrapper";
 
-  // CLICK EVENT (CORE FEATURE)
-  can.addEventListener('click', () => {
+  const can = document.createElement("div");
+  can.className = "water-can";
+
+  can.addEventListener("click", () => {
     if (!gameActive) return;
 
     currentCans++;
-    document.getElementById('current-cans').textContent = currentCans;
+    currentCansEl.textContent = currentCans;
 
-    // visual feedback
-    can.style.transform = "scale(1.2)";
+    playSound(collectSound);
+
+    can.style.transform = "scale(1.18)";
+    can.style.opacity = "0.7";
+
+    checkMilestones();
+
     setTimeout(() => {
-      can.style.transform = "scale(1)";
-    }, 100);
-
-    // remove after click
-    can.remove();
+      wrapper.remove(); // DOM removal requirement
+    }, 80);
   });
 
-  randomCell.appendChild(can);
+  wrapper.appendChild(can);
+  randomCell.appendChild(wrapper);
 }
 
-// TIMER
+function checkMilestones() {
+  milestoneMessages.forEach(milestone => {
+    if (currentCans === milestone.score && !shownMilestones.includes(milestone.score)) {
+      milestoneEl.textContent = milestone.text;
+      shownMilestones.push(milestone.score);
+
+      setTimeout(() => {
+        if (milestoneEl.textContent === milestone.text) {
+          milestoneEl.textContent = "";
+        }
+      }, 1800);
+    }
+  });
+}
+
 function startTimer() {
-  timeLeft = 30;
-  document.getElementById('timer').textContent = timeLeft;
+  const settings = difficultySettings[selectedDifficulty];
+  timeLeft = settings.time;
+  timerEl.textContent = timeLeft;
 
   timerInterval = setInterval(() => {
     timeLeft--;
-    document.getElementById('timer').textContent = timeLeft;
+    timerEl.textContent = timeLeft;
 
     if (timeLeft <= 0) {
       endGame();
@@ -79,77 +171,100 @@ function startTimer() {
   }, 1000);
 }
 
-// START GAME
+function clearBoard() {
+  const cells = document.querySelectorAll(".grid-cell");
+  cells.forEach(cell => {
+    cell.innerHTML = "";
+  });
+}
+
 function startGame() {
   if (gameActive) return;
 
+  const settings = difficultySettings[selectedDifficulty];
+
   gameActive = true;
   currentCans = 0;
-  document.getElementById('current-cans').textContent = 0;
-  document.getElementById('achievements').textContent = "";
+  shownMilestones = [];
+  currentCansEl.textContent = 0;
+  achievementsEl.textContent = "";
+  milestoneEl.textContent = "";
+  goalDisplayEl.textContent = settings.goal;
+  timerEl.textContent = settings.time;
+  currentDifficultyEl.textContent = settings.label;
+
+  clearInterval(spawnInterval);
+  clearInterval(timerInterval);
 
   createGrid();
-  spawnInterval = setInterval(spawnWaterCan, 800);
+  spawnWaterCan();
+  spawnInterval = setInterval(spawnWaterCan, settings.spawnRate);
   startTimer();
+
+  resetGameBtn.style.display = "inline-block";
 }
 
-// END GAME
 function endGame() {
   gameActive = false;
   clearInterval(spawnInterval);
   clearInterval(timerInterval);
+  clearBoard();
 
-  const messageBox = document.getElementById('achievements');
+  const settings = difficultySettings[selectedDifficulty];
+  let message = "";
 
-  let message;
-
-  if (currentCans >= GOAL_CANS) {
+  if (currentCans >= settings.goal) {
     message = winMessages[Math.floor(Math.random() * winMessages.length)];
-    messageBox.style.color = "green";
+    achievementsEl.style.color = "#8CFF98";
+    playSound(winSound);
 
-    // 🎉 celebration
     setTimeout(() => {
-      alert("You Win! 🎉");
-    }, 200);
-
+      alert(`You Win! 🎉 You collected ${currentCans} cans!`);
+    }, 150);
   } else {
     message = loseMessages[Math.floor(Math.random() * loseMessages.length)];
-    messageBox.style.color = "red";
+    achievementsEl.style.color = "#FFB3B3";
+    playSound(loseSound);
   }
 
-  messageBox.textContent = message;
+  achievementsEl.textContent = message;
 }
 
-// RESET BUTTON (LEVEL UP)
 function resetGame() {
-  location.reload();
+  playSound(clickSound);
+
+  clearInterval(spawnInterval);
+  clearInterval(timerInterval);
+  gameActive = false;
+  currentCans = 0;
+  shownMilestones = [];
+  achievementsEl.textContent = "";
+  milestoneEl.textContent = "";
+  currentCansEl.textContent = 0;
+  updateDifficultyUI();
+  createGrid();
 }
 
-// BUTTON EVENTS
-document.getElementById('start-game').addEventListener('click', startGame);
+difficultyButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    playSound(clickSound);
+    selectedDifficulty = button.dataset.mode;
+    updateDifficultyUI();
+  });
+});
 
-// Create Reset Button dynamically
-const resetBtn = document.createElement('button');
-resetBtn.textContent = "Reset Game";
-resetBtn.style.backgroundColor = "#FFC907";
-resetBtn.style.color = "#000";
-resetBtn.style.marginTop = "10px";
-
-resetBtn.addEventListener('click', resetGame);
-
-document.querySelector('.container').appendChild(resetBtn);
-
-const overlay = document.getElementById('instruction-overlay');
-const startOverlayBtn = document.getElementById('start-from-overlay');
-
-// Start game from overlay
-startOverlayBtn.addEventListener('click', () => {
-  overlay.style.display = 'none';
+startOverlayBtn.addEventListener("click", () => {
+  playSound(clickSound);
+  overlay.style.display = "none";
   startGame();
 });
 
-function resetGame() {
-  if (confirm("Restart the game?")) {
-    location.reload();
-  }
-}
+startGameBtn.addEventListener("click", () => {
+  playSound(clickSound);
+  startGame();
+});
+
+resetGameBtn.addEventListener("click", resetGame);
+
+createGrid();
+updateDifficultyUI();
